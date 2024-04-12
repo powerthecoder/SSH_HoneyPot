@@ -25,3 +25,5 @@ def first_time():
     cursor.close()
     connection.close()
     print("SQL Table Closed")
+
+first_time()

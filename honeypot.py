@@ -5,10 +5,16 @@ import time
 import sqlite3
 
 class SSH_Server(paramiko.ServerInterface):
+    def __init__(self):
+        self.client_ip = None
+    
+    def get_banner(self):
+        return "SSH HONEYPOT", None
+    
     def check_auth_passwd(self, username, password):
         connection = sqlite3.connect("honeypot_logs.db")
         cursor = connection.cursor()
-        cursor.execute(f"INSERT INTO honeypot (log_time, username, password) VALUES (CURRENT_TIMESTAMP, '{username}', '{password}')")
+        cursor.execute(f"INSERT INTO honeypot (log_time, ip_addy, username, password) VALUES (CURRENT_TIMESTAMP, '{self.client_ip}', '{username}', '{password}')")
         cursor.execute("COMMIT")
         cursor.close()
         connection.close()
@@ -18,7 +24,7 @@ class SSH_Server(paramiko.ServerInterface):
     def check_auth_publickey(self, username, key):
         connection = sqlite3.connect("honeypot_logs.db")
         cursor = connection.cursor()
-        cursor.execute(f"INSERT INTO honeypot_key (log_time, username, keys) VALUES (CURRENT_TIMESTAMP, '{username}', '{key}')")
+        cursor.execute(f"INSERT INTO honeypot_key (log_time, ip_addy, username, keys) VALUES (CURRENT_TIMESTAMP, '{self.client_ip}', '{username}', '{key}')")
         cursor.execute("COMMIT")
         cursor.close()
         connection.close()
@@ -28,7 +34,9 @@ class SSH_Server(paramiko.ServerInterface):
 def handle_connection(client_sock, server_key):
     transport = paramiko.Transport(client_sock)
     transport.add_server_key(server_key)
+    client_ip = client_sock.getpeername()[0]
     ssh = SSH_Server
+    ssh.client_ip = client_ip
     transport.start_server(server=ssh)
 
 def main():
