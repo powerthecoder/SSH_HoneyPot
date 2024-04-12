@@ -18,7 +18,7 @@ class SSH_Server(paramiko.ServerInterface):
         sql = sqlite3.connect("SSH_HoneyPot/honeypot_logs.db")
         c = sql.cursor()
         # This is where we are inserting all of the information into the database to be able to view later
-        c.execute(f"INSERT INTO honeypot (log_time, ip_addy, username, password) VALUES (CURRENT_TIMESTAMP, '{self.client_ip}', '{username}', '{password}')")
+        c.execute(f"INSERT INTO honeypot (log_time, ip_addy, username, password) VALUES (CURRENT_TIMESTAMP, ?, ?, ?)", (self.client_ip, username, password))
         c.execute("COMMIT")
         c.close()
         sql.close() # CLOSE IT... dont want anything to break (O_O”)
@@ -33,7 +33,7 @@ class SSH_Server(paramiko.ServerInterface):
         sql = sqlite3.connect("SSH_HoneyPot/honeypot_logs.db")
         c = sql.cursor()
         # This is where we are inserting all of the information into the database to be able to view later
-        c.execute(f"INSERT INTO honeypot_key (log_time, ip_addy, username, password) VALUES (CURRENT_TIMESTAMP, '{self.client_ip}', '{username}', '{key}')")
+        c.execute(f"INSERT INTO honeypot_key (log_time, ip_addy, username, keys) VALUES (CURRENT_TIMESTAMP, ?, ?, ?)", (self.client_ip, username, key))
         c.execute("COMMIT")
         c.close()
         sql.close() # CLOSE IT... dont want anything to break (O_O”)
